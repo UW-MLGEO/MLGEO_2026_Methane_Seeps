@@ -46,17 +46,17 @@ All data are collected from the OOI RCA infrastructure at Southern Hydrate Ridge
    - Methane (CH₄) concentration (nM/L)
    - Hydrogen (H₂) concentration (nM/L)
    - Hydrogen Sulfide (H₂S) concentration (mM/L)
+   - Nitrogen (N₂) concentration (nM/L)
+   - Oxygen (O₂) concentration (nM/L)
+   - Carbon dioxide (CO₂) concentration (nM/L)
    - Derived from partial pressure measurements using Henry's Law
-   - From: `methane_concentration_2017.csv`
+   - Ex: `methane_concentration_2017.csv`
 
 ## Data Processing Pipeline
 
 ### Temporal Alignment
 
-All data streams are aligned to **22-second time windows** corresponding to RGA measurement timestamps. This window size balances:
-- Sufficient seismic signal for spectral analysis
-- ADCP measurement intervals
-- Computational efficiency
+All seismic are aligned to **22-second time windows** corresponding to RGA measurement timestamps, while ADCP measurements are on an hour long basis.
 
 ### Seismic Data Processing
 
@@ -73,13 +73,13 @@ For each 22-second window:
 ### Acoustic (ADCP) Data Processing
 
 1. **Load NetCDF**: Read hourly ADCP velocity data
-2. **Temporal Extraction**: For each 22-second window, extract all ADCP measurements
+2. **Temporal Extraction**: For each 22-second window, extract all ADCP measurements - may replicate many measurements across windows due to hourly binning constraint
 3. **Bin Averaging**: If multiple depth bins present, compute mean across bins
 4. **Unit Conversion**: Convert m/s to cm/s where appropriate
 
 ### Target Variable Calculation
 
-Methane and hydrogen concentrations are calculated from mass spectrometer partial pressure measurements using **Henry's Law**:
+All chmeical concentrations are calculated from mass spectrometer partial pressure measurements using **Henry's Law**:
 
 ```
 C = K_H × P_partial
@@ -87,12 +87,12 @@ C = K_H × P_partial
 
 Where:
 - C = dissolved gas concentration (nM/L)
-- K_H = Henry's Law constant (temperature and salinity dependent)
+- K_H = Henry's Law constant (temperature and depth dependent - unique for each concentration, courtesy of NOAA)
 - P_partial = partial pressure measured by mass spectrometer
 
 ## Machine Learning Approaches
 
-This project implements **two complementary modeling strategies**, each suited to different aspects of the data:
+This project initially implemented **two complementary modeling strategies**, each suited to different aspects of the data:
 
 ### Approach 1: Feature-Based Random Forest Regression
 
@@ -114,13 +114,12 @@ This project implements **two complementary modeling strategies**, each suited t
 **Model Architecture**:
 - Algorithm: Random Forest Regressor (scikit-learn)
 - Configuration:
-  - 100-150 trees
-  - Max depth: 15-16
+  - 400 trees
+  - Max depth: 12
   - Min samples split: 5
   - Min samples leaf: 2
   - Max features: 'sqrt'
 - Validation: 5-fold cross-validation
-- Weighting: Sample weights based on inverse frequency to balance distribution
 
 **Advantages**:
 - Interpretable feature importances
@@ -176,46 +175,25 @@ This project implements **two complementary modeling strategies**, each suited t
 - **RMSE** (Root Mean Squared Error): Prediction accuracy
 - **R²** (Coefficient of Determination): Explained variance
 - **MAE** (Mean Absolute Error): Average prediction error
-- **Weighted metrics**: Account for distribution imbalance
-
-### Distribution Balancing
-
-The target variable (methane concentration) exhibits a skewed distribution. We address this through:
-
-1. **Sample Weighting**: Inverse frequency weighting during training
-   - Rare concentration values receive higher weights
-   - Prevents model bias toward common values
-
-2. **Transformation Options** (explored):
-   - Yeo-Johnson power transformation
-   - Quantile transformation to normal distribution
-   - Bootstrap resampling for Gaussian approximation
-   - Exponential decay transformation
 
 ## Results Summary
 
 ### Random Forest Performance
 
-- Cross-validation R²: [To be filled with results]
+- Cross-validation R²: 90%
 - Test set R²: 90%
-- Test set RMSE: [To be filled with results]
+- Test set residual: 
 
 **Top Feature Importances**:
 - Dominant spectral power from seismic East component (E_power1) - 35%
 - Dominant spectral frequency from seismic East component (E_freq1) - 10%
 - Average amplitude from seismic East component (E_mean) - 9%
-- Median bubble plume velocity from acoustic velocity profiler (adcp_median)
-- Mean bubble plume velocity from acoustic velocity profiler (adcp_mean) 
-
-### CNN Performance
-
-- Cross-validation R²: [To be filled with results]
-- Test set R²: [To be filled with results]
-- Test set RMSE: [To be filled with results]
+- Median bubble plume velocity from acoustic velocity profiler (adcp_median) - 9%
+- Mean bubble plume velocity from acoustic velocity profiler (adcp_mean) - 9%
 
 ### Model Comparison
 
-[Comparative analysis of RF vs CNN performance, including error distribution across different methane concentration ranges]
+The CNN model resulted in poor performance on raw time series data, while the RF showed robust performance. We opted to use the RF model in our final analysis.
 
 ## Repository Structure
 
@@ -375,35 +353,32 @@ Michael Hemmett
 
 ### Scientific Background
 
-1. Hautala, S. L., et al. (2014). "Dissociation of Cascadia margin gas hydrates in response to contemporary ocean warming." *Geophysical Research Letters*, 41(23).
+MacLeod, L. M. F., & Wilcock, W. S. D. (2025). Nonseismic short-duration events offshore Cascadia: Characteristics and potential origin. Seismological Research Letters, 96(2A), 706–720. [https://doi.org/10.1785/0220240367](https://doi.org/10.1785/0220240367)
 
-2. Suess, E., et al. (1999). "Flammable ice." *Scientific American*, 281(5), 76-83.
+Marcon, Y., Kelley, D. S., Thornton, B., Manalang, D., & Bohrmann, G. (2021). Variability of natural methane bubble release at Southern Hydrate Ridge. Geochemistry, Geophysics, Geosystems, 22, e2021GC009894. [https://doi.org/10.1029/2021GC009894](https://doi.org/10.1029/2021GC009894)
 
-3. Riedel, M., et al. (2006). "Nature and distribution of gas hydrates in the southern Hydrate Ridge region, Cascadia margin." *Journal of Geophysical Research*, 111(B11).
+Reeburgh, W. S. (2007). Oceanic methane biogeochemistry. Chemical Reviews, 107(2), 486–513. [https://doi.org/10.1021/cr050362v](https://doi.org/10.1021/cr050362v)
 
-### Machine Learning Methods
+Römer, M., Sahling, H., Pape, T., Bahr, A., Feseker, T., Wintersteller, P., & Bohrmann, G. (2014). Microbial abundance and diversity patterns associated with sediments and carbonates from methane seep environments of Hydrate Ridge, Oregon. Frontiers in Marine Science, 1, Article 44. [https://doi.org/10.3389/fmars.2014.00044](https://doi.org/10.3389/fmars.2014.00044)
 
-4. Breiman, L. (2001). "Random forests." *Machine Learning*, 45(1), 5-32.
+Sahling, H., Galkin, S. V., Salyuk, A., Greinert, J., Foerstel, H., Piepenburg, D., & Suess, E. (2002). Macrofaunal community structure and sulfide flux at gas hydrate deposits from the Cascadia convergent margin, NE Pacific. Marine Ecology Progress Series, 231, 121–138.
 
-5. LeCun, Y., Bengio, Y., & Hinton, G. (2015). "Deep learning." *Nature*, 521(7553), 436-444.
+Treude, T., Boetius, A., Knittel, K., Wallmann, K., & Jørgensen, B. B. (2003). Anaerobic oxidation of methane above gas hydrates at Hydrate Ridge, NE Pacific Ocean. Marine Ecology Progress Series, 264, 1–14.
+
+Tryon, M. D., Brown, K. M., & Torres, M. E. (2001). Complex flow patterns through Hydrate Ridge and their impact on seep biota. Geophysical Research Letters, 28(15), 2863–2866. [https://doi.org/10.1029/2000GL012566](https://doi.org/10.1029/2000GL012566)
+
+Luff, R., Wallmann, K., Aloisi, G., et al. (2008). Miniaturized biosignature analysis reveals implications for the formation of cold seep carbonates at Hydrate Ridge (off Oregon, USA). Biogeosciences, 5, 731–741.
+
 
 ### OOI Documentation
 
-6. Ocean Observatories Initiative. "Regional Cabled Array." https://oceanobservatories.org/
-
-## Citation
-
-If you use this code or methodology, please cite:
-
-```
-[Your citation format here]
-```
+Ocean Observatories Initiative. "Regional Cabled Array." https://oceanobservatories.org/
 
 ## License
 
-[Specify license - e.g., MIT, GPL, Academic use only, etc.]
+MIT open license
 
 ---
 
-**Last Updated**: February 2026  
-**Project Status**: Active Development
+**Last Updated**: March 2026  
+**Project Status**: Not currently under development
