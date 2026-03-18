@@ -101,15 +101,16 @@ This project initially implemented **two complementary modeling strategies**, ea
 **Feature Extraction** (per 22-second window):
 
 **Seismic Features** (per component: Z, N, E):
-- Amplitude statistics: max, min, mean, median
-- Spectral features: top 3 dominant frequencies and their power
-- Total: ~24 features per window
+- Mean amplitude
+- Spectral features: top dominant frequencies and their power
+- Average frequency and amplitude across all components
+- Total: 11
 
 **Acoustic Features**:
 - Mean velocity in 22-second window
 - Maximum velocity
 - Minimum velocity
-- Standard deviation
+- Median velocity
 
 **Model Architecture**:
 - Algorithm: Random Forest Regressor (scikit-learn)
@@ -150,7 +151,7 @@ This project initially implemented **two complementary modeling strategies**, ea
 ### Data Split Strategy
 
 - **Training set**: 70% of data (further split in 5-fold CV)
-- **Validation sets**: 5 folds for cross-validation
+- **Validation sets**: 15% of data, 5 folds for cross-validation
 - **Test set**: 15% held-out data for final evaluation
 
 ### Performance Metrics
@@ -164,11 +165,11 @@ This project initially implemented **two complementary modeling strategies**, ea
 ### Random Forest Performance
 
 - Cross-validation R²: 90%
-- Test set R²: 90%
-- Test set residual: 
+- Test set R²: ~90%
+- Test set residual: ~85%
 
 **Top Feature Importances**:
-- Dominant spectral power from seismic East component (E_power1) - 35%
+- Dominant spectral power from seismic East component (E_power1) - 39%
 - Dominant spectral frequency from seismic East component (E_freq1) - 10%
 - Average amplitude from seismic East component (E_mean) - 9%
 - Median bubble plume velocity from acoustic velocity profiler (adcp_median) - 9%
@@ -236,49 +237,6 @@ requests>=2.26.0
   - Client: `obspy.clients.fdsn.Client("IRIS")`
   - Networks: OO (Ocean Observatories Initiative)
 
-## Usage
-
-### 1. Feature-Based Random Forest Workflow
-
-```python
-# Run feature extraction and RF training
-jupyter notebook shr_seismicity_relevant_dates.ipynb
-
-# Key cells:
-# - Data loading and window creation
-# - Feature extraction from seismic/acoustic data
-# - Random Forest training with 5-fold CV
-# - Model evaluation and visualization
-```
-
-### 2. Time Series CNN Workflow
-
-```python
-# Run time series extraction and CNN training
-jupyter notebook shr_seismicity_relevant_dates_time_series.ipynb
-
-# Key cells:
-# - Time series extraction (22-sec windows)
-# - Data storage as pickle files
-# - CNN model training with PyTorch
-# - Model comparison with Random Forest
-```
-
-### 3. Loading Pre-trained Models
-
-```python
-# Load Random Forest
-import pickle
-with open('models/rf_model_final.pkl', 'rb') as f:
-    rf_model = pickle.load(f)
-
-# Load CNN
-import torch
-checkpoint = torch.load('models/cnn_model_final.pth')
-cnn_model = CNN1DRegressor(input_dim=n_features)
-cnn_model.load_state_dict(checkpoint['model_state_dict'])
-```
-
 ## Scientific Applications
 
 ### Methane Flux Estimation
@@ -324,6 +282,7 @@ cnn_model.load_state_dict(checkpoint['model_state_dict'])
 Christina Stuhl
 David Lovett
 Michael Hemmett
+Isaac Olson
 
 ## Acknowledgments
 
