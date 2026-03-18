@@ -187,7 +187,6 @@ MLGEO_2026_Methane_Seeps/
 │   ├── random_forest_features.ipynb    # Feature-based RF model
 │   ├── time_series_cnn.ipynb           # CNN on raw time series
 │   ├── shr_seismicity*.ipynb           # Seismic and short-duration event exploration
-│   ├── pressure_seismic_analysis.ipynb # Pressure–seismic relationships
 │   ├── MSDataToCSV.py                  # MASSPA data-to-CSV utilities
 │   └── ...                             # Additional EDA and figure notebooks
 ├── figures/                            # Exported figures for writeup/docs
@@ -203,7 +202,7 @@ MLGEO_2026_Methane_Seeps/
 
 ## Dependencies
 
-This project’s environment is defined in `docs/environment.yml` (Conda) and `docs/requirements.txt` (pip). The `pyproject.toml` in `MLGEO_2026_Hydrothermal_Vents/` provides a lightweight dependency specification for the subproject.
+This project’s environment is defined in `docs/environment.yml` (Conda) and `docs/requirements.txt` (pip). The `pyproject.toml` in `MLGEO_2026_Methane_Seeps/docs/` provides a lightweight dependency specification for the subproject.
 
 ### Recommended Python
 
