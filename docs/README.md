@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project develops machine learning models to predict key chemical concentrations (methane and hydrogen) at the Southern Hydrate Ridge methane seep site using multimodal geophysical data from the Ocean Observatories Initiative (OOI) Regional Cabled Array (RCA). By leveraging reliable, long-lasting instruments (seismometers, pressure sensors, acoustic Doppler current profilers), we aim to predict biogeochemically important chemical concentrations during time periods when direct mass spectrometer measurements are unavailable.
+This project develops machine learning models to predict key dissolved gas concentrations (primarily methane and hydrogen) at the Southern Hydrate Ridge methane seep site using multimodal geophysical data from the Ocean Observatories Initiative (OOI) Regional Cabled Array (RCA). By mapping robust physical measurements (seismometers, pressure sensors, and an acoustic Doppler current profiler) to residual gas analyzer–derived concentrations, we aim to fill instrument downtime and data gaps in seep chemistry. This README provides a concise technical overview; see `docs/writeup.md` for the full narrative description and figures.
 
 ## Scientific Context
 
@@ -182,60 +182,60 @@ The CNN model resulted in poor performance on raw time series data, while the RF
 ## Repository Structure
 
 ```
-mlgeo-methane-seeps/
-├── shr_seismicity_relevant_dates.ipynb          # Feature-based RF analysis
-├── shr_seismicity_relevant_dates_time_series.ipynb  # Time series CNN analysis
-├── data/
-│   ├── methane_concentration_2017.csv           # Target variables
-│   ├── RS01SUM2-MJ01B-12-ADCPSK101_*.nc        # ADCP data
-│   └── seismic_features_*.csv                   # Extracted features
-├── models/
-│   ├── rf_model_final.pkl                       # Trained Random Forest
-│   ├── cnn_model_final.pth                      # Trained CNN
-│   └── transformers.pkl                         # Data transformers
-├── results/
-│   ├── correlation_matrix_*.png
-│   ├── pca_analysis_*.png
-│   ├── random_forest_5fold_cv_results.png
-│   └── cnn_regression_5fold_cv_results.png
-└── MLGEO_2026_Hydrothermal_Vents/
-    └── docs/
-        └── README.md                             # This file
-```
+MLGEO_2026_Methane_Seeps/
+├── notebooks/                          # Analysis and modeling notebooks
+│   ├── random_forest_features.ipynb    # Feature-based RF model
+│   ├── time_series_cnn.ipynb           # CNN on raw time series
+│   ├── shr_seismicity*.ipynb           # Seismic and short-duration event exploration
+│   ├── pressure_seismic_analysis.ipynb # Pressure–seismic relationships
+│   ├── MSDataToCSV.py                  # MASSPA data-to-CSV utilities
+│   └── ...                             # Additional EDA and figure notebooks
+├── figures/                            # Exported figures for writeup/docs
+├── docs/
+│   ├── README.md                       # This file (project overview)
+│   ├── writeup.md                      # Full scientific writeup
+│   ├── environment.yml                 # Conda environment
+│   └── requirements.txt                # pip requirements
+│   ├── MSDataCollectorV1/              # Raw data collection utilities
+│   ├── pyproject.toml                  # Python project metadata
+│   └── uv.lock                         # Locked dependency versions
+
 
 ## Dependencies
 
-### Python Environment
+This project’s environment is defined in `docs/environment.yml` (Conda) and `docs/requirements.txt` (pip). The `pyproject.toml` in `MLGEO_2026_Hydrothermal_Vents/` provides a lightweight dependency specification for the subproject.
 
-```python
-# Core scientific computing
-numpy>=1.21.0
-pandas>=1.3.0
-scipy>=1.7.0
+### Recommended Python
 
-# Seismic data processing
-obspy>=1.3.0
+- Python >= 3.8
 
-# NetCDF file handling
-netCDF4>=1.5.7
+### Core Packages
 
-# Machine learning
-scikit-learn>=1.0.0
-torch>=1.10.0
+- Scientific computing: `numpy`, `pandas`, `scipy`
+- Seismic and NetCDF I/O: `obspy`, `netCDF4`, `cftime`, `xarray`
+- Machine learning: `scikit-learn`, `torch`/`pytorch`, `torchvision`
+- Visualization: `matplotlib`, `seaborn`
+- Notebooks and tooling: `jupyter`, `ipykernel`, `notebook`, `jupyterlab`, `tqdm`, `statsmodels`
+- Web and utilities: `requests`, `bs4`, `datetime`
 
-# Visualization
-matplotlib>=3.4.0
-seaborn>=0.11.0
+To reproduce the environment with Conda:
 
-# Data access
-requests>=2.26.0
+```bash
+conda env create -f docs/environment.yml
+conda activate mlgeo-methane-seeps
+```
+
+Or with pip (inside a virtual environment):
+
+```bash
+pip install -r docs/requirements.txt
 ```
 
 ### External Data Services
 
 - **IRIS FDSN Web Services**: Seismic waveform data
-  - Client: `obspy.clients.fdsn.Client("IRIS")`
-  - Networks: OO (Ocean Observatories Initiative)
+   - Client: `obspy.clients.fdsn.Client("IRIS")`
+   - Networks: OO (Ocean Observatories Initiative)
 
 ## Scientific Applications
 

@@ -16,7 +16,7 @@ Methane seeps are undersea sites where methane hydrates, sediments with methane 
 Southern Hydrate Ridge (SHR) is a methane seep site in the Northeast Pacific Ocean, located offshore Newport, Oregon. Located at a depth of 700 m in the anoxic zone, this site was generated as hydrates were buried and uplifted on the Cascadia Subduction Zone accretionary wedge complex, (Luff et al., 2008). Multiple methane plumes drive a unique marine ecosystem, including several protected species of marine organisms significant to the Pacific Northwest fisheries industry, including the rock fish. Additionally, marine mammals such as fin whales pass this site during annual migrations. This site is highly instrumented as part of the Ocean Observatories Initiative (OOI) Regional Cabled Array, including broadband and short-period seismometers, ocean-bottom pressure gauges, an acoustic doppler velocity profiler (ADCP) and a mass spectrometer RGA, for seawater chemical analysis. The seismometers sit 100 m away from the Summit A site where the other instruments are located. Summit A is also known as "Einstein's Grotto."
 
 
-![figure1_map.png](figure1_map.png)
+![figure1_map.png](../figures/figure1_map.png)
 
 **Figure 1:**  Three maps of Southern Hydrate Ridge that provide visual and spatial context for our project and just exactly how small our special extent actually is.
 
@@ -36,7 +36,7 @@ Data from the non-commercial RGA instrument is sparse across its years of operat
 The RGA mass spectrometer instrument uses a permeable membrane to intake seawater, calculate the pressure of a range of atomic masses in the sample, and reset for the next reading. This sampling process takes 22 seconds, (OOI). Pressure readings that spike at an atomic mass unit of significance can be converted to partial pressure by dividing the pressure of the peak of interest by the sum of all pressure readings in the sample. Partial pressures can then be converted to aqueous concentrations of dissolved gases using Henry's Law. For small concentrations relative to the whole of the sample, this conversion can be approximated in the linear regime of Henry's Law, $C = k_{H} * P$, where $C$ is concentration, $P$ is partial pressure, and $K_{H}$ is a temperature- and depth-dependent linear constant specific for each dissolved gas.
 
 
-![figure2_chemistry.png](figure2_chemistry.png)
+![figure2_chemistry.png](../figures/figure2_chemistry.png)
 
 **Figure 2:** RGA Data Acquisition. A comprehensive overview of the extraction methods for the TGA at SHR Summit A. Each RGA .txt file included a spectra of values associated with the partial pressure (Torr) of a specific gas identified by an atomic mass (amu).
 
@@ -54,7 +54,7 @@ This concludes the process by which concnetration data was collected from the RG
 At SHR, the dissolved gases that best constrain seep chemistry are methane gas ($CH_{4}$), a direct product of methanogenesis from the seep methane hydrate breaking down, hydrogen sulfide ($H_{2}S$), a product of the central chemosynthetic process for which methane is a reactant (Sahling et al., 2002), and hydrogen gas ($H_{2}$). Three other trace gases that constrain the seawater chemistry at the seep site are nitrogen gas ($N_{2}$), relevant for isolating marine mammal signatures, oxygen gas ($O_{2}$), and carbon dioxide ($CO_{2}$). These gases and their role in methane sources and sinks at the seep site are included in Table 1.
 
 
-![table1_chemistry.png](table1_chemistry.png)
+![table1_chemistry.png](../figures/table1_chemistry.png)
 
 **Table 1:** Dominant aqueous reactions that serve as sources and sinks of methane gas, hydrogen sulfide, and nitrogen gas at SHR.
 
@@ -66,7 +66,7 @@ Unidentifiable non-seismic signals detected on a single ocean-bottom seismometer
 
 Combined together, these two physical measurements capture distinct and complementary nonlinear relationships between physical signals and seep chemistry, which we will capture with ML.
 
-## Data
+## Data: Inputs and Outputs
 While all instruments were deployed for multiple overlapping years in the period of 2015-2018, not all instruments collected data in these times. Additionally, RGA data is very sparse and the majority of the measurements available on the OOI raw data site were taken during 2017.
 
 We download all processed RGA spectra in text files from the OOI raw data site for the MASSPA101B instrument, the RGA mass spectrometer located at SHR Summit 2. We extract peaks for the six dissolved gases relevant to capturing seep chemistry and calculate partial pressures for each at the timestamps provided in the titles of the data text files. We then use Henry's Law and six distinct constants for the expected seawater temperature, the depth of SHR at 700 m, and the relevant dissolved gas, to calculate gas concentrations in seawater. These constants were extracted from a reference table developed by NOAA. There were a total of 29,770 RGA measurements in 2017. We interpret the RGA timestamps as the time at which the sample was collected, or the start of a 22-second window corresponding to the mass spectrometer measurement period. From these, we construct a set of 29,770 22-second timestamp periods into which seismic and acoustic features could be processed and binned.
@@ -80,7 +80,7 @@ Combining the nine seismic features, three for each component, plus two features
 The training dataset captured a variety of events that the ΜL model will distinguish and constrain. First, explosion-like non-seismic events occur at the same time as dramatic increases in acoustic velocity and methane concentration. These likely capture SDE methane venting, the primary event type for the ML model to constrain. Secondly, unrelated SDEs that do not correspond with changes in the acoustic velocities or seep chemistry. Third, a high concnetration of fin whale calls during migration events along the Oregon coast in the end of January. This corresponds to a dramatic peak in nitrogen concentration, but no change in seep dynamics. This captures whale waste and bioturbation, wherein whales dive deep for food and resurface, thereby vertically cycling the water column.
 
 
-![figure3_data.png](figure3_data.png)
+![figure3_data.png](../figures/figure3_data.png)
 
 **Figure 3:** A variety of non-seismic SDEs compared to mean acoustic velocity (gold), with methane (green), and nitrogen concnetrations (blue). SDE samples are seconds-long, extracted from within the highlighted time periods shown on the right.
 
@@ -102,7 +102,7 @@ We used a training, validation, and test set split of 70%, 15%, and 15%, respect
 The RF model showed an average training set and validation set $R^{2}$ accuracies of approximately 90%, with a test set accuracy of approximately 85%. The small gap between training, validation, and test set accuracies shows that overfitting was minimized while maintaining a high performance on unseen data. This held true for all dissolved gas concentrations except carbon dioxide, which showed a model accuracy of less than 50% and a large gap in performance between the training, validation, and test sets. This suggests that the extracted physical features largely capture the variance in the seep chemistry related to methane venting signals, but does not constrain carbon dioxide concentration that is likely driven by other factors not present in the training features; thus, the model overtrains on the carbon dioxide target but performs well on other chemcial concentrations.
 
 
-![figure4_accuracy.png](figure4_accuracy.png)
+![figure4_accuracy.png](../figures/figure4_accuracy.png)
 
 **Figure 4:** RF model accuracy for all six dissolved gas concentrations across training, K-fold validation, and test sets.
 
@@ -110,19 +110,23 @@ The RF model showed an average training set and validation set $R^{2}$ accuracie
 By analyzing model residuals across the training, validation, and test sets, it is clear that methane gas and hydrogen sulfide gas show symmetric, sharp peaks with minimal residuals. The interpretation is that the model is accurately predicting these two gas concentrations, which are the most significant for constraining seep activity. The other four trace gases show irregular distributions, long tails, and large residuals, suggesting the RF model often inaccurately predicts values for these concentrations.
 
 
-![figure5_residuals.png](figure5_residuals.png)
+![figure5_residuals.png](../figures/figure5_residuals.png)
 
 **Figure 5:** RF model residuals for all six dissolved gas concentrations across training, K-fold validation, and test sets.
-
 
 We then prepared physical inputs from January 2016, a month for which there is little RGA data, extracting 22-second seismic features every five minutes across the month to reduce computational load. After predicting chemical concentrations for January 2016 with the trained RF model, output distributions show little fluctuation and a small spread of concentrations. Without additional RGA data to evaluate model accuracy and residuals, the model performance in this unseen time period remains ambiguous. Based on the results in 2017, the model performance may be well-constrained, showing there is no significant methane venting across the month. Further testing is needed to confirm the model's generalizability to other time periods and datasets.
 
 
-![figure6_pred.png](figure6_pred.png)
+![figure6_pred.png](../figures/figure6_pred.png)
 
 **Figure 6:** RF model predictions for all six dissolved gas concentrations in January 2016.
 
-## Conclusion
+## Future Work
+This model shows promising preliminary results characterizing methanogenesis with seismic and acoustic velocity monitoring. In the future, additional processed RGA .txt files could be extracted from the OOI raw data website to expand the model dataset beyond 2017, both to reduce the impact of overfitting on the noise profile of 2017, and to allow rigorous model testing on data from unseen years. After the model has been fine-tuned, we plan construct input seismic and acoustic features across all years that both the seismometer and ADCP were operational to "fill in the gaps" where the RGA did not collect data. This would generate new datasets for multi-year chemical monitoring at a significant chemosynthetic ecosystem on the seafloor.
+
+Future implementations of this method could be developed for other methane seep sites, such as in the Atlantic Ocean, though site-specific bathymetry and chemistry would likely require developing a model from scratch, rather than integrating transfer learning. In the Northeast Pacific, this method could be applied to hydrothermal vent fields on Axial Seamount. These sites have broad spatial and temporal coverage with seismic and ADCP instruments, but with limited RGA mass spectrometer coverage like SHR. Hydrothermal vents cycle trace iron, the bio-limiting nutrient in the oceans, and venting productivity may be correlated to submarine volcano eruption cycles; thus, this model could help quantify how mid-ocean ridge volcanism drives trace iron availability and marine ecosystems in the deep ocean.
+
+## Conclusions
 Methane seep sites host dynamic chemosynthetic ecosystems on the seafloor, but little chemical monitoring leaves unanswered questions about how seep variability controls ecosystem dynamics. Additionally, the problem of non-seismic SDEs at methane seep sites remains unresolvable without additional data. By constraining methane seep chemistry with related physical measurements of methane bubble plume dynamics, we develop an RF model to predict seep chemistry using long-lasting, reliable instruments, with potential to identify SDEs using single seismic station data. While initial results show promising performance on a fast ML architecture, expanded and rigorous assessment on model generalizability is needed before pursuing model deployment on seafloor hardware.
 
 ## Citations
